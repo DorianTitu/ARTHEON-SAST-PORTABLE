@@ -508,7 +508,7 @@ class HTMLReporter:
                 </div>
                 <div class="metric-box metric-info">
                     <div class="metric-value">{self.js_files_count}</div>
-                    <div class="metric-label">JS Files</div>
+                    <div class="metric-label">Source Files</div>
                 </div>
                 <div class="metric-box metric-info">
                     <div class="metric-value">{len(self._group_by_file())}</div>
@@ -604,6 +604,10 @@ class HTMLReporter:
                                 <div class="finding-meta-item">
                                     <span class="finding-meta-label">Rule</span>
                                     {finding['rule_id']}
+                                </div>
+                                <div class="finding-meta-item">
+                                    <span class="finding-meta-label">Language</span>
+                                    {finding.get('language', 'Unknown')}
                                 </div>
                             </div>
                             <div class="finding-code">{self._escape_html(finding['code'])}</div>
