@@ -336,15 +336,16 @@ pre {
 
 <table class="global">
 <tr>
-    <th>Risk</th><th>ID</th><th>Vulnerability</th><th>File</th>
+    <th>Risk</th><th>ID</th><th>Vulnerability</th><th>File</th><th>Lines</th>
 </tr>
 
-{% for f in findings %}
+{% for f in global_vulnerabilities %}
 <tr>
     <td><span class="badge {{ f.severity }}">{{ f.severity|capitalize }}</span></td>
     <td>{{ f.rule_id }}</td>
     <td>{{ f.rule_name }}</td>
     <td>{{ f.file }}</td>
+    <td>{{ f.lines_display }}</td>
 </tr>
 {% endfor %}
 </table>

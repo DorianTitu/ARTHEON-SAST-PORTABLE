@@ -25,7 +25,8 @@ class HTMLReporter:
             "timestamp": self.timestamp,
             "js_files_count": self.js_files_count,
             "severity_counts": self._count_by_severity(),
-            "grouped": self._group_by_file()
+            "grouped": self._group_by_file(),
+            "global_vulnerabilities": self._group_global_vulnerabilities(),
         }
 
         html = template.render(context)
@@ -98,3 +99,48 @@ class HTMLReporter:
         for f in self.findings:
             grouped.setdefault(f['file'], []).append(f)
         return grouped
+
+    def _group_global_vulnerabilities(self):
+        """Group global vulnerabilities by severity/rule/file and aggregate lines.
+
+        This keeps the global table compact while preserving where each
+        vulnerability appears within the file.
+        """
+        grouped = {}
+
+        for finding in self.findings:
+            key = (
+                finding["severity"],
+                finding["rule_id"],
+                finding["rule_name"],
+                finding["file"],
+            )
+
+            if key not in grouped:
+                grouped[key] = {
+                    "severity": finding["severity"],
+                    "rule_id": finding["rule_id"],
+                    "rule_name": finding["rule_name"],
+                    "file": finding["file"],
+                    "lines": set(),
+                }
+
+            grouped[key]["lines"].add(finding["line"])
+
+        items = []
+        for _, data in grouped.items():
+            sorted_lines = sorted(data["lines"])
+            data["lines"] = sorted_lines
+            data["lines_display"] = ", ".join(str(line) for line in sorted_lines)
+            items.append(data)
+
+        severity_rank = {name: idx for idx, name in enumerate(self.severity_order)}
+        items.sort(
+            key=lambda item: (
+                severity_rank.get(item["severity"], len(self.severity_order)),
+                item["rule_id"],
+                item["file"],
+            )
+        )
+
+        return items
