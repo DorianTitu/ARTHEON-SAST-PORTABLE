@@ -290,5 +290,109 @@ VULN_RULES = {
             "Evitar Object.assign() y spread operator con datos untrusted",
             "Usar librerías como lodash con opciones de seguridad habilitadas"
         ]
+    },
+
+    "idor_insecure_direct_object_reference": {
+        "name": "IDOR (Insecure Direct Object Reference)",
+        "severity": "high",
+        "patterns": [
+            r"router\.(?:get|put|patch|delete)\s*\(\s*['\"]/.*:id",
+            r"(?:req\.params|req\.query)\.(?:id|userId|accountId|orderId)",
+            r"(?:findByPk|findById|findOne)\s*\(\s*(?:req\.params|req\.query)\.(?:id|userId|accountId|orderId)",
+            r"where\s*:\s*\{\s*id\s*:\s*(?:req\.params|req\.query)\.(?:id|userId)",
+            r"\.destroy\s*\(\s*\{\s*where\s*:\s*\{\s*id\s*:\s*(?:req\.params|req\.query)",
+            r"\.update\s*\(\s*.*\{\s*where\s*:\s*\{\s*id\s*:\s*(?:req\.params|req\.query)",
+            r"db\.(?:users|accounts|orders)\.(?:find|get|delete|update)\s*\(\s*(?:req\.params|req\.query)",
+            r"/api/(?:users|accounts|orders)/\$\{.*(?:id|userId)",
+            r"req\.user\.(?:id|sub)\s*\|\|\s*(?:req\.params|req\.query)\.(?:id|userId)",
+            r"authorize\s*\(\s*\)\s*;\s*(?:.*)\.(?:findById|findByPk)\s*\(\s*req\.params\.id"
+        ],
+        "description": "Acceso directo a recursos por ID controlado por usuario sin verificación de propiedad/autorización (IDOR)",
+        "recommendations": [
+            "Verificar ownership del recurso antes de devolver o modificar datos",
+            "No confiar en IDs recibidos desde params/query/body",
+            "Aplicar controles de autorización por objeto (ABAC/RBAC por recurso)",
+            "Usar IDs indirectos u opacos cuando sea posible",
+            "Registrar y monitorear acceso a objetos sensibles",
+            "Añadir pruebas negativas para acceso cruzado entre usuarios"
+        ]
+    },
+
+    "debug_endpoint_exposure": {
+        "name": "Exposición de información sensible (debug endpoint)",
+        "severity": "medium",
+        "patterns": [
+            r"app\.get\s*\(\s*['\"]/debug",
+            r"router\.get\s*\(\s*['\"]/debug",
+            r"app\.get\s*\(\s*['\"]/__debug__",
+            r"app\.get\s*\(\s*['\"]/internal",
+            r"res\.json\s*\(\s*\{\s*(?:stack|trace|config|env|process\.env)",
+            r"console\.log\s*\(\s*(?:process\.env|req\.headers|req\.cookies)",
+            r"errorHandler\s*\(\s*\{\s*showStack\s*:\s*true",
+            r"NODE_ENV\s*!==\s*['\"]production['\"]",
+            r"app\.use\s*\(\s*require\(['\"]morgan['\"]\)\s*\(\s*['\"]dev['\"]\)",
+            r"res\.send\s*\(\s*err\.stack"
+        ],
+        "description": "Endpoints o respuestas de debug pueden exponer stack traces, variables de entorno y configuración sensible",
+        "recommendations": [
+            "Deshabilitar endpoints de debug en producción",
+            "No retornar stack traces al cliente",
+            "Filtrar secretos en logs y respuestas de error",
+            "Proteger rutas internas con autenticación fuerte",
+            "Usar manejo de errores genérico para clientes",
+            "Configurar NODE_ENV=production en despliegues"
+        ]
+    },
+
+    "jwt_auth_mismanagement": {
+        "name": "Mala gestión de autenticación con JWT",
+        "severity": "high",
+        "patterns": [
+            r"jwt\.sign\s*\(\s*.*,\s*['\"][^'\"]+['\"]",
+            r"jwt\.verify\s*\(\s*token\s*,\s*['\"][^'\"]+['\"]",
+            r"ignoreExpiration\s*:\s*true",
+            r"options\s*:\s*\{\s*ignoreExpiration\s*:\s*true",
+            r"expiresIn\s*:\s*['\"](?:365d|10y|9999)",
+            r"algorithm\s*:\s*['\"]none['\"]",
+            r"jwt\.decode\s*\(\s*token\s*\)",
+            r"Authorization\s*[:=]\s*['\"]Bearer\s+",
+            r"SECRET(?:_KEY)?\s*[:=]\s*['\"][^'\"]+['\"]",
+            r"allowInvalidAsymmetricKeyTypes\s*:\s*true"
+        ],
+        "description": "Configuraciones inseguras de JWT (secreto hardcodeado, expiración débil o validación incompleta)",
+        "recommendations": [
+            "Guardar secretos JWT fuera del código fuente",
+            "Validar firma, issuer, audience y expiración",
+            "Evitar algoritmos inseguros como none",
+            "Usar expiraciones cortas y rotación de claves",
+            "No usar decode() para decisiones de autorización",
+            "Implementar revocación/blacklist para tokens comprometidos"
+        ]
+    },
+
+    "jwt_forgery_token_manipulation": {
+        "name": "JWT Forgery (Token Manipulation)",
+        "severity": "critical",
+        "patterns": [
+            r"token\.split\(['\"]\\.['\"]\)\[1\]",
+            r"JSON\.parse\s*\(\s*atob\s*\(\s*token\.split",
+            r"Buffer\.from\s*\(\s*token\.split\(['\"]\\.['\"]\)\[1\]",
+            r"payload\[['\"](?:role|admin|isAdmin)['\"]\]\s*=",
+            r"jwt\.decode\s*\(\s*token\s*,\s*\{\s*complete\s*:\s*true",
+            r"verify_signature\s*:\s*false",
+            r"algorithms\s*:\s*\[\s*['\"]\*['\"]\s*\]",
+            r"none\s*algorithm",
+            r"token\s*=\s*header\s*\+\s*['\"]\\.['\"]\s*\+\s*payload\s*\+\s*['\"]\\.['\"]",
+            r"res\.locals\.(?:user|claims)\s*=\s*jwt\.decode"
+        ],
+        "description": "Manipulación del payload JWT sin verificación robusta de firma permite escalación de privilegios",
+        "recommendations": [
+            "Usar jwt.verify() con lista explícita de algoritmos permitidos",
+            "Rechazar tokens con alg=none",
+            "Nunca confiar en claims decodificados sin verificar firma",
+            "Validar aud/iss/sub y clocks de expiración",
+            "Firmar con claves fuertes y rotarlas periódicamente",
+            "Registrar intentos de tokens inválidos/manipulados"
+        ]
     }
 }

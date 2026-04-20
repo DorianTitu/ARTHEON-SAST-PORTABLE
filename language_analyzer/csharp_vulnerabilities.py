@@ -257,5 +257,109 @@ CSHARP_VULN_RULES = {
             "Validar y sanitizar entrada del usuario",
             "Usar ORM con parametrización automática"
         ]
+    },
+
+    "idor_insecure_direct_object_reference": {
+        "name": "IDOR (Insecure Direct Object Reference)",
+        "severity": "high",
+        "patterns": [
+            r"\[Http(?:Get|Put|Patch|Delete)\s*\(\s*['\"].*\{id\}",
+            r"\[FromRoute\]\s*(?:int|long|string)\s+id",
+            r"\[FromQuery\]\s*(?:int|long|string)\s+id",
+            r"request\.(?:Query|RouteValues)\[['\"]id['\"]\]",
+            r"\.FindAsync\s*\(\s*id\s*\)",
+            r"\.FirstOrDefaultAsync\s*\(\s*.*\s*=>\s*.*\.Id\s*==\s*id",
+            r"\.Remove\s*\(\s*entity\s*\)",
+            r"return\s+Ok\s*\(\s*entity\s*\)",
+            r"var\s+entity\s*=\s*await\s+_context\.\w+\.FindAsync\s*\(\s*id\s*\)",
+            r"GetById\s*\(\s*(?:int|long|string)\s+id\s*\)"
+        ],
+        "description": "Acceso directo a objetos por ID controlado por usuario sin autorización por recurso (IDOR)",
+        "recommendations": [
+            "Verificar ownership/autorización del recurso antes de retornar o modificar",
+            "No confiar en IDs enviados por cliente",
+            "Aplicar autorización por objeto en capa de negocio",
+            "Usar identificadores opacos cuando sea posible",
+            "Registrar accesos y denegaciones a recursos sensibles",
+            "Crear pruebas para acceso horizontal entre usuarios"
+        ]
+    },
+
+    "debug_endpoint_exposure": {
+        "name": "Exposición de información sensible (debug endpoint)",
+        "severity": "medium",
+        "patterns": [
+            r"\[HttpGet\s*\(\s*['\"]/debug",
+            r"MapGet\s*\(\s*['\"]/debug",
+            r"UseDeveloperExceptionPage\s*\(\s*\)",
+            r"app\.UseExceptionHandler\s*\(\s*['\"]/Error\s*\)",
+            r"IncludeExceptionDetails\s*=\s*true",
+            r"return\s+Problem\s*\(\s*detail\s*:\s*ex\.ToString\s*\(",
+            r"return\s+Content\s*\(\s*ex\.StackTrace",
+            r"Environment\.GetEnvironmentVariables\s*\(",
+            r"builder\.Logging\.SetMinimumLevel\s*\(\s*LogLevel\.Debug\s*\)",
+            r"ASPNETCORE_ENVIRONMENT\s*=\s*['\"]Development['\"]"
+        ],
+        "description": "Endpoints o configuración de debug pueden exponer stack traces, variables de entorno o configuración interna",
+        "recommendations": [
+            "Deshabilitar páginas de excepción de desarrollo en producción",
+            "No retornar stack traces al cliente",
+            "Restringir endpoints internos de diagnóstico",
+            "Filtrar datos sensibles en logs y respuestas",
+            "Usar respuestas de error genéricas",
+            "Separar perfiles Development/Production correctamente"
+        ]
+    },
+
+    "jwt_auth_mismanagement": {
+        "name": "Mala gestión de autenticación con JWT",
+        "severity": "high",
+        "patterns": [
+            r"new\s+SymmetricSecurityKey\s*\(\s*Encoding\.UTF8\.GetBytes\s*\(\s*['\"][^'\"]+['\"]\s*\)\s*\)",
+            r"IssuerSigningKey\s*=\s*new\s+SymmetricSecurityKey\s*\(\s*Encoding\.UTF8\.GetBytes\s*\(\s*['\"][^'\"]+['\"]",
+            r"ValidateIssuer\s*=\s*false",
+            r"ValidateAudience\s*=\s*false",
+            r"ValidateLifetime\s*=\s*false",
+            r"RequireExpirationTime\s*=\s*false",
+            r"ClockSkew\s*=\s*TimeSpan\.From(?:Hours|Days)\s*\(",
+            r"SecurityAlgorithms\.None",
+            r"JwtSecurityToken\s*\(\s*.*expires\s*:\s*DateTime\.UtcNow\.AddDays\s*\(\s*365",
+            r"TokenValidationParameters\s*\{\s*.*\}"
+        ],
+        "description": "Configuración JWT insegura por validaciones deshabilitadas, secretos débiles o expiraciones excesivas",
+        "recommendations": [
+            "Guardar llaves JWT fuera del código fuente",
+            "Habilitar ValidateIssuer, ValidateAudience y ValidateLifetime",
+            "Evitar SecurityAlgorithms.None",
+            "Usar expiraciones cortas y refresh tokens controlados",
+            "Rotar llaves periódicamente",
+            "Auditar errores de validación de token"
+        ]
+    },
+
+    "jwt_forgery_token_manipulation": {
+        "name": "JWT Forgery (Token Manipulation)",
+        "severity": "critical",
+        "patterns": [
+            r"token\.Split\s*\(\s*'\\.'\s*\)\s*\[1\]",
+            r"Convert\.FromBase64String\s*\(\s*token\.Split",
+            r"Encoding\.UTF8\.GetString\s*\(\s*Convert\.FromBase64String",
+            r"JsonSerializer\.Deserialize\s*<\s*Dictionary<",
+            r"claims\[['\"](?:role|admin|isAdmin)['\"]\]\s*=",
+            r"new\s+JwtSecurityToken\s*\(\s*header\s*,\s*payload",
+            r"ReadJwtToken\s*\(\s*token\s*\)",
+            r"CanReadToken\s*\(\s*token\s*\)",
+            r"if\s*\(\s*jwt\.Payload\[['\"]role['\"]\]",
+            r"token\s*=\s*header\s*\+\s*\"\\.\"\s*\+\s*payload"
+        ],
+        "description": "Manipulación manual del JWT o uso de claims sin validar firma facilita suplantación y elevación de privilegios",
+        "recommendations": [
+            "No usar claims de un token sin validación criptográfica",
+            "Validar firma y restricciones de algoritmo en cada solicitud",
+            "Rechazar tokens con alg=none",
+            "No construir tokens manualmente concatenando header/payload",
+            "Usar bibliotecas JWT seguras y mantenidas",
+            "Monitorear patrones de token inválido o manipulado"
+        ]
     }
 }

@@ -257,5 +257,109 @@ JAVA_VULN_RULES = {
             "Implementar rate limiting en intentos de login",
             "Usar tokens seguros con expiration"
         ]
+    },
+
+    "idor_insecure_direct_object_reference": {
+        "name": "IDOR (Insecure Direct Object Reference)",
+        "severity": "high",
+        "patterns": [
+            r"@(?:GetMapping|PutMapping|PatchMapping|DeleteMapping)\s*\(\s*['\"].*\{id\}",
+            r"@PathVariable\s*(?:\(\s*['\"]id['\"]\s*\))?\s*Long\s+id",
+            r"request\.getParameter\s*\(\s*['\"]id['\"]\s*\)",
+            r"repository\.findById\s*\(\s*id\s*\)",
+            r"repository\.deleteById\s*\(\s*id\s*\)",
+            r"entityManager\.find\s*\(\s*\w+\.class\s*,\s*id\s*\)",
+            r"service\.get(?:User|Account|Order)ById\s*\(\s*id\s*\)",
+            r"Optional<\w+>\s+\w+\s*=\s*repository\.findById\s*\(\s*id\s*\)",
+            r"return\s+ResponseEntity\.ok\s*\(\s*\w+\s*\)",
+            r"@RequestParam\s*\(\s*['\"]id['\"]\s*\)"
+        ],
+        "description": "Acceso a objetos por ID controlado por usuario sin control de autorización por recurso (IDOR)",
+        "recommendations": [
+            "Validar ownership/autorización del recurso antes de leer o modificar",
+            "No confiar en IDs recibidos por path/query/body",
+            "Aplicar autorización a nivel de objeto (method security + ABAC/RBAC)",
+            "Usar identificadores opacos cuando sea viable",
+            "Registrar eventos de acceso a recursos sensibles",
+            "Agregar pruebas de acceso cruzado entre usuarios"
+        ]
+    },
+
+    "debug_endpoint_exposure": {
+        "name": "Exposición de información sensible (debug endpoint)",
+        "severity": "medium",
+        "patterns": [
+            r"@RequestMapping\s*\(\s*['\"]/debug",
+            r"@GetMapping\s*\(\s*['\"]/debug",
+            r"['\"]/actuator/(?:env|heapdump|threaddump|mappings|beans)['\"]",
+            r"management\.endpoints\.web\.exposure\.include\s*=\s*\*",
+            r"server\.error\.include-stacktrace\s*=\s*always",
+            r"logging\.level\.org\.springframework\s*=\s*DEBUG",
+            r"response\.getWriter\s*\(\s*\)\.print\s*\(\s*e\.getStackTrace",
+            r"return\s+e\.toString\s*\(\s*\)",
+            r"System\.out\.println\s*\(\s*System\.getenv\s*\(",
+            r"spring\.devtools\.restart\.enabled\s*=\s*true"
+        ],
+        "description": "Endpoints o configuración de debug pueden exponer stack traces, entorno y configuración sensible",
+        "recommendations": [
+            "Deshabilitar endpoints de depuración en producción",
+            "No exponer stack traces al cliente",
+            "Restringir endpoints Actuator con autenticación/autorización",
+            "No loggear secretos ni variables sensibles",
+            "Usar mensajes de error genéricos hacia cliente",
+            "Separar perfiles de configuración dev/prod"
+        ]
+    },
+
+    "jwt_auth_mismanagement": {
+        "name": "Mala gestión de autenticación con JWT",
+        "severity": "high",
+        "patterns": [
+            r"setSigningKey\s*\(\s*['\"][^'\"]+['\"]\s*\)",
+            r"Algorithm\.HMAC256\s*\(\s*['\"][^'\"]+['\"]\s*\)",
+            r"JWT\.require\s*\(\s*Algorithm\.HMAC256\s*\(\s*['\"]weak['\"]",
+            r"\.setAllowedClockSkewSeconds\s*\(\s*(?:86400|999999)",
+            r"\.setExpiration\s*\(\s*new\s+Date\s*\(\s*System\.currentTimeMillis\s*\(\s*\)\s*\+\s*31536000000",
+            r"parseClaimsJwt\s*\(",
+            r"parseClaimsJws\s*\(\s*token\s*\)\s*;\s*//\s*no\s*aud",
+            r"setAllowedAlgorithms\s*\(\s*Arrays\.asList\s*\(\s*['\"]none['\"]",
+            r"SECRET_KEY\s*=\s*['\"][^'\"]+['\"]",
+            r"jwtSecret\s*=\s*['\"][^'\"]+['\"]"
+        ],
+        "description": "Configuración insegura de JWT por secretos hardcodeados o validaciones incompletas",
+        "recommendations": [
+            "Guardar secretos/llaves fuera del código fuente",
+            "Validar firma, issuer, audience y expiración",
+            "Rechazar algoritmo none y limitar algoritmos permitidos",
+            "Usar expiración corta y rotación de claves",
+            "Agregar revocación de tokens cuando aplique",
+            "Instrumentar monitoreo de fallos de validación JWT"
+        ]
+    },
+
+    "jwt_forgery_token_manipulation": {
+        "name": "JWT Forgery (Token Manipulation)",
+        "severity": "critical",
+        "patterns": [
+            r"token\.split\s*\(\s*['\"]\\.['\"]\s*\)\s*\[1\]",
+            r"Base64\.getDecoder\s*\(\s*\)\.decode\s*\(\s*token\.split",
+            r"new\s+String\s*\(\s*Base64\.getDecoder\s*\(\s*\)\.decode",
+            r"claims\.put\s*\(\s*['\"](?:role|admin|isAdmin)['\"]",
+            r"payload\.put\s*\(\s*['\"](?:role|admin|scope)['\"]",
+            r"ObjectMapper\s+\w+\s*=\s*new\s+ObjectMapper\s*\(\s*\)",
+            r"JWT\.decode\s*\(\s*token\s*\)",
+            r"if\s*\(\s*decodedToken\.getClaim\s*\(\s*['\"]role['\"]\s*\)",
+            r"header\.put\s*\(\s*['\"]alg['\"]\s*,\s*['\"]none['\"]",
+            r"token\s*=\s*header\s*\+\s*['\"]\\.['\"]\s*\+\s*payload"
+        ],
+        "description": "Manipulación manual del JWT o uso de claims sin verificar firma permite suplantación de identidad",
+        "recommendations": [
+            "No confiar en claims decodificados sin verificación criptográfica",
+            "Validar firma y metadatos del token en cada request",
+            "Restringir estrictamente algoritmos permitidos",
+            "Rechazar tokens con alg=none",
+            "Usar bibliotecas JWT mantenidas con defaults seguros",
+            "Agregar detección y alertas para intentos de token manipulado"
+        ]
     }
 }

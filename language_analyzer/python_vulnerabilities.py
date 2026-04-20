@@ -257,5 +257,109 @@ PYTHON_VULN_RULES = {
             "Implementar límites en tamaño de archivos",
             "Usar whitelist de elementos XML permitidos"
         ]
+    },
+
+    "idor_insecure_direct_object_reference": {
+        "name": "IDOR (Insecure Direct Object Reference)",
+        "severity": "high",
+        "patterns": [
+            r"@app\.route\s*\(\s*['\"].*/<(?:int|str):[^>]+>",
+            r"@router\.(?:get|put|patch|delete)\s*\(\s*['\"].*/\{(?:id|user_id|account_id|order_id)[^}]*\}",
+            r"(?:request\.args|request\.form|request\.json)\.get\s*\(\s*['\"](?:id|user_id|account_id|order_id|resource_id)['\"]",
+            r"@(?:app|router)\.route\s*\(\s*['\"][^'\"]*<(?:int|str):[^>]+>",
+            r"\.(?:objects|query)\.(?:get|filter_by)\s*\(\s*.*=\s*(?:request\.args|request\.form|request\.json|id)[^)]*\)",
+            r"get_object_or_404\s*\(\s*\w+\s*,\s*(?:id|pk)\s*=\s*(?:request\.args|id)",
+            r"c\.execute\s*\(\s*['\"]SELECT.*WHERE\s+(?:id|user_id)\s*=\s*\?",
+            r"return\s+jsonify\s*\(\s*\{[^}]*\}\s*\)\s*$",
+            r"if\s+not\s+user:\s+return",
+            r"return\s+jsonify\s*\(.*(?:username|password|data).*\)"
+        ],
+        "description": "Acceso directo a objetos por identificador controlado por usuario sin validar autorización de acceso (IDOR)",
+        "recommendations": [
+            "Verificar ownership/autorización por recurso antes de operar",
+            "No confiar en IDs enviados por cliente",
+            "Aplicar controles de acceso a nivel de objeto",
+            "Usar identificadores opacos cuando sea posible",
+            "Registrar acceso a recursos sensibles",
+            "Agregar pruebas de acceso cruzado entre usuarios"
+        ]
+    },
+
+    "debug_endpoint_exposure": {
+        "name": "Exposición de información sensible (debug endpoint)",
+        "severity": "medium",
+        "patterns": [
+            r"@app\.route\s*\(\s*['\"](?:/debug|/__debug__|/internal|/api/dev)",
+            r"@router\.(?:get|post)\s*\(\s*['\"](?:/debug|/internal)",
+            r"@app\.route\s*\(\s*['\"][^'\"]*(?:debug|internal|dev|admin)[^'\"]*['\"]",
+            r"DEBUG\s*=\s*True",
+            r"app\.run\s*\(\s*.*debug\s*=\s*True",
+            r"return\s+jsonify\s*\(\s*\{[^}]*(?:SECRET|jwt_secret|alg|version)[^}]*\}",
+            r"return\s+str\s*\(\s*e\s*\)",
+            r"return\s+f['\"](?:.*)?{.*}(?:.*)?['\"]",
+            r"print\s*\(\s*request\.(?:headers|cookies|environ|full_path)",
+            r"settings\.DEBUG\s*=\s*True"
+        ],
+        "description": "Endpoints/modos de depuración pueden exponer stack traces, entorno y datos sensibles",
+        "recommendations": [
+            "Desactivar modo debug en producción",
+            "No exponer stack trace al cliente final",
+            "Restringir endpoints internos de diagnóstico",
+            "Evitar imprimir secretos en logs",
+            "Usar respuestas de error genéricas para clientes",
+            "Separar logs técnicos de respuestas HTTP"
+        ]
+    },
+
+    "jwt_auth_mismanagement": {
+        "name": "Mala gestión de autenticación con JWT",
+        "severity": "high",
+        "patterns": [
+            r"jwt\.encode\s*\(\s*.*\s*,\s*['\"][^'\"]+['\"]",
+            r"jwt\.decode\s*\(\s*token\s*,\s*verify\s*=\s*False",
+            r"jwt\.decode\s*\(\s*token\s*,\s*options\s*=\s*\{\s*['\"]verify_signature['\"]\s*:\s*False",
+            r"options\s*=\s*\{\s*['\"]verify_exp['\"]\s*:\s*False",
+            r"algorithms\s*=\s*\[\s*['\"]none['\"]\s*\]",
+            r"SECRET_KEY\s*=\s*['\"][^'\"]+['\"]",
+            r"JWT_SECRET\s*=\s*['\"][^'\"]+['\"]",
+            r"ACCESS_TOKEN_EXPIRE_(?:MINUTES|HOURS|DAYS)\s*=\s*(?:365|9999)",
+            r"from\s+jwt\s+import\s+decode",
+            r"authorization\s*=\s*request\.headers\.get\s*\(\s*['\"]Authorization['\"]"
+        ],
+        "description": "Uso inseguro de JWT por secretos hardcodeados, validaciones deshabilitadas o expiraciones débiles",
+        "recommendations": [
+            "Almacenar secretos JWT fuera del código fuente",
+            "Validar firma, expiración, issuer y audience",
+            "No permitir algoritmo none",
+            "Usar expiraciones cortas y refresh tokens controlados",
+            "Rotar claves de firma periódicamente",
+            "Invalidar tokens comprometidos mediante blacklist"
+        ]
+    },
+
+    "jwt_forgery_token_manipulation": {
+        "name": "JWT Forgery (Token Manipulation)",
+        "severity": "critical",
+        "patterns": [
+            r"token\.split\(['\"]\\.['\"]\)\[1\]",
+            r"base64\.b64decode\s*\(\s*token\.split",
+            r"json\.loads\s*\(\s*base64\.b64decode",
+            r"payload\[['\"](?:role|admin|is_admin)['\"]\]\s*=",
+            r"jwt\.decode\s*\(\s*token\s*,\s*options\s*=\s*\{\s*['\"]verify_signature['\"]\s*:\s*False",
+            r"jwt\.decode\s*\(\s*token\s*,\s*verify\s*=\s*False",
+            r"algorithms\s*=\s*\[\s*['\"]\*['\"]\s*\]",
+            r"SECRET_KEY\s*=\s*os\.getenv\s*\(\s*['\"]JWT_SECRET['\"],\s*['\"][^'\"]{10,}['\"]",
+            r"token\s*=\s*jwt\.encode\s*\(.*\)",
+            r"except\s+Exception\s+as\s+e[\s\S]{0,100}return\s+f?['\"].*\{?str\s*\(\s*e\s*\)?\}?"
+        ],
+        "description": "Manipulación manual del token JWT o validación parcial puede permitir suplantación y escalación de privilegios",
+        "recommendations": [
+            "No decodificar claims para autorización sin verificar firma",
+            "Validar algoritmo permitido explícitamente",
+            "Rechazar tokens con alg=none",
+            "Comprobar firma y metadatos del token en cada solicitud",
+            "Auditar eventos de token inválido/manipulado",
+            "Usar librerías JWT mantenidas y configuración segura"
+        ]
     }
 }
