@@ -32,6 +32,12 @@ setup(
     ],
     python_requires=">=3.8",
     keywords="sast security testing javascript vulnerability scanner",
+    install_requires=[
+        "jinja2>=3.1.0",
+    ],
+    extras_require={
+        "pdf": ["playwright>=1.44.0"],
+    },
     entry_points={
         "console_scripts": [
             "artheon-sast=language_analyzer.__main__:main",

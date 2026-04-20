@@ -25,12 +25,40 @@ Static Application Security Testing tool for multiple programming languages
 pip install artheon-sast
 ```
 
+Includes HTML report support via Jinja2.
+
+### Optional PDF Support (no browser headers/footers)
+```bash
+pip install "artheon-sast[pdf]"
+python -m playwright install chromium
+```
+
 ## Usage
 
 ### Command Line
 ```bash
 artheon-sast /path/to/your/project
 ```
+
+Generate report in a custom location with a unified flag:
+```bash
+artheon-sast /path/to/your/project --output ./reports/my_report.html
+```
+
+Generate PDF directly from Python (clean pages, no title/URL in margins):
+```bash
+artheon-sast /path/to/your/project --pdf
+```
+
+Generate PDF in custom path (with --pdf, .pdf means PDF output):
+```bash
+artheon-sast /path/to/your/project --pdf --output ./reports/my_report.pdf
+```
+
+Notes:
+- Without --pdf, --output controls the HTML report path.
+- With --pdf, --output controls the PDF report path.
+- In --pdf mode the tool uses a temporary HTML internally and only keeps the PDF output.
 
 Scans all source files, detects vulnerabilities, generates HTML report, and opens it in browser.
 
@@ -41,6 +69,9 @@ from language_analyzer import SecurityScanner
 scanner = SecurityScanner("/path/to/project")
 scanner.scan()
 report_path = scanner.generate_html_report()
+
+# Optional: PDF generation via Playwright
+pdf_path = scanner.generate_pdf_report()
 ```
 
 ## Vulnerability Categories by Language
@@ -125,7 +156,8 @@ Status: 6/6 tests passing
 ## Requirements
 
 - Python 3.8+
-- No external dependencies
+- jinja2 (installed automatically)
+- playwright (optional, only for PDF export)
 
 ## Authors
 

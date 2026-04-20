@@ -8,6 +8,9 @@ version = "1.1"
 description = "Static Application Security Testing tool for JavaScript"
 readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+    "jinja2>=3.1.0"
+]
 license = {text = "MIT"}
 authors = [
     {name = "Dorian Tituaña"},
@@ -34,6 +37,11 @@ classifiers = [
 Homepage = "https://github.com/yourusername/artheon-sast"
 Repository = "https://github.com/yourusername/artheon-sast"
 Issues = "https://github.com/yourusername/artheon-sast/issues"
+
+[project.optional-dependencies]
+pdf = [
+    "playwright>=1.44.0"
+]
 
 [project.scripts]
 artheon-sast = "language_analyzer.__main__:main"

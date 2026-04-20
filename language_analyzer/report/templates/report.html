@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SAST Report</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: 'Segoe UI', Arial;
+    background: #f8fafc;
+    margin: 0;
+    color: #111827;
+}
+
+header {
+    background: white;
+    border-bottom: 2px solid #e5e7eb;
+    padding: 25px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.header-meta p {
+    margin: 6px 0;
+}
+
+.pdf-btn {
+    border: 1px solid #111827;
+    background: #111827;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.pdf-btn:hover {
+    background: #1f2937;
+}
+
+.pdf-btn:active {
+    transform: translateY(1px);
+}
+
+.container {
+    padding: 25px;
+}
+
+h2 {
+    margin-top: 35px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 5px;
+}
+
+/* Section colors */
+.section-executive { border-left: 5px solid #2563eb; padding-left: 10px; }
+.section-global { border-left: 5px solid #dc2626; padding-left: 10px; }
+.section-details { border-left: 5px solid #4b5563; padding-left: 10px; }
+
+/* KPI */
+.kpis {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.kpis div {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+    font-size: 14px;
+}
+
+/* Severity table */
+.severity-summary {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.severity-summary th {
+    color: white;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.severity-summary th:nth-child(1) { background:#b91c1c; }
+.severity-summary th:nth-child(2) { background:#dc2626; }
+.severity-summary th:nth-child(3) { background:#d97706; }
+.severity-summary th:nth-child(4) { background:#2563eb; }
+.severity-summary th:nth-child(5) { background:#4b5563; }
+
+.severity-summary td {
+    text-align: center;
+    padding: 12px;
+    font-weight: bold;
+    background: white;
+}
+
+/* Chart */
+.chart-wrap {
+    margin-top: 25px;
+    background: white;
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    height: 320px;
+    max-height: 320px;
+}
+
+.chart-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+    margin-top: 0;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+/* Global table */
+.global {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #e5e7eb;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.global th {
+    background: #1f2937;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.global td {
+    padding: 12px;
+    border-top: 1px solid #e5e7eb;
+    word-break: break-all;
+}
+
+.global tr:hover {
+    background: #f9fafb;
+}
+
+/* Badge */
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.badge.critical { background:#fee2e2; color:#b91c1c; }
+.badge.high { background:#ffe4e6; color:#dc2626; }
+.badge.medium { background:#fef3c7; color:#d97706; }
+.badge.low { background:#dbeafe; color:#2563eb; }
+.badge.info { background:#f3f4f6; color:#4b5563; }
+
+/* Cards */
+.card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 5px solid #d97706;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.card.critical { border-left-color:#b91c1c; }
+.card.high { border-left-color:#dc2626; }
+.card.medium { border-left-color:#d97706; }
+.card.low { border-left-color:#2563eb; }
+
+.card h4 {
+    margin-bottom: 10px;
+}
+
+.card p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+/* Code */
+pre {
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #e5e7eb;
+    overflow-x: auto;
+}
+
+/* Recommendations */
+.recommendations {
+    margin-top: 15px;
+    padding: 12px;
+    background: #eef2ff;
+    border-left: 4px solid #6366f1;
+    border-radius: 6px;
+}
+
+.recommendations ul {
+    margin: 5px 0 0 15px;
+}
+
+.recommendations li {
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .header-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pdf-btn {
+        width: 100%;
+    }
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .pdf-btn {
+        display: none;
+    }
+
+    .severity-summary th:nth-child(1) { background:#b91c1c !important; color:#ffffff !important; }
+    .severity-summary th:nth-child(2) { background:#dc2626 !important; color:#ffffff !important; }
+    .severity-summary th:nth-child(3) { background:#d97706 !important; color:#ffffff !important; }
+    .severity-summary th:nth-child(4) { background:#2563eb !important; color:#ffffff !important; }
+    .severity-summary th:nth-child(5) { background:#4b5563 !important; color:#ffffff !important; }
+
+    .global th {
+        background: #1f2937 !important;
+        color: #ffffff !important;
+    }
+
+    .badge.critical { background:#fee2e2 !important; color:#b91c1c !important; }
+    .badge.high { background:#ffe4e6 !important; color:#dc2626 !important; }
+    .badge.medium { background:#fef3c7 !important; color:#d97706 !important; }
+    .badge.low { background:#dbeafe !important; color:#2563eb !important; }
+    .badge.info { background:#f3f4f6 !important; color:#4b5563 !important; }
+
+    .chart-wrap {
+        height: 220px;
+        max-height: 220px;
+    }
+
+    header,
+    .card,
+    .global,
+    .chart-wrap {
+        box-shadow: none;
+    }
+
+    .card,
+    .global,
+    tr,
+    pre,
+    .chart-wrap,
+    .chart-wrap canvas,
+    .kpis div {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="header-meta">
+            <h1>Security Analysis Report</h1>
+            <p><strong>Directory:</strong> {{ directory }}</p>
+            <p><strong>Generated:</strong> {{ timestamp }}</p>
+        </div>
+        <button class="pdf-btn" type="button" onclick="downloadPdf()">Descargar PDF</button>
+    </div>
+</header>
+
+<div class="container">
+
+<h2 class="section-executive">Executive Summary</h2>
+
+<div class="kpis">
+    <div>Total Issues<br><strong>{{ findings|length }}</strong></div>
+    <div>Files<br><strong>{{ js_files_count }}</strong></div>
+    <div>Affected Files<br><strong>{{ grouped|length }}</strong></div>
+</div>
+
+<table class="severity-summary">
+<tr>
+    <th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Info</th>
+</tr>
+<tr>
+    <td>{{ severity_counts.critical }}</td>
+    <td>{{ severity_counts.high }}</td>
+    <td>{{ severity_counts.medium }}</td>
+    <td>{{ severity_counts.low }}</td>
+    <td>{{ severity_counts.info }}</td>
+</tr>
+</table>
+
+<div class="chart-wrap">
+    <canvas id="chart"></canvas>
+</div>
+
+<h2 class="section-global">Global Vulnerabilities</h2>
+
+<table class="global">
+<tr>
+    <th>Risk</th><th>ID</th><th>Vulnerability</th><th>File</th>
+</tr>
+
+{% for f in findings %}
+<tr>
+    <td><span class="badge {{ f.severity }}">{{ f.severity|capitalize }}</span></td>
+    <td>{{ f.rule_id }}</td>
+    <td>{{ f.rule_name }}</td>
+    <td>{{ f.file }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2 class="section-details">Detailed Findings</h2>
+
+{% for file, items in grouped.items() %}
+<h3>{{ file }}</h3>
+
+{% for f in items %}
+<div class="card {{ f.severity }}">
+    <h4>{{ f.rule_name }}</h4>
+
+    <p><b>Severity:</b> {{ f.severity|capitalize }}</p>
+    <p><b>Line:</b> {{ f.line }}</p>
+
+    <p><b>Description:</b><br>{{ f.description }}</p>
+
+    <p><b>Vulnerable Code:</b></p>
+    <pre>{{ f.code }}</pre>
+
+    {% if f.recommendations %}
+    <div class="recommendations">
+        <p><b>Recommendations:</b></p>
+        <ul>
+            {% for rec in f.recommendations %}
+                <li>{{ rec }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% endfor %}
+
+</div>
+
+<script id="severity-data" type="application/json">
+{{ [
+    severity_counts.critical,
+    severity_counts.high,
+    severity_counts.medium,
+    severity_counts.low,
+    severity_counts.info
+] | tojson }}
+</script>
+
+<script>
+function downloadPdf() {
+    window.print();
+}
+
+const severityData = JSON.parse(document.getElementById('severity-data').textContent);
+
+new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+        labels: ['Critical','High','Medium','Low','Info'],
+        datasets: [{
+            data: severityData,
+            backgroundColor: ['#b91c1c','#dc2626','#d97706','#2563eb','#4b5563']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

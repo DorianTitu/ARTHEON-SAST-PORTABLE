@@ -6,7 +6,7 @@ from .js_vulnerabilities import VULN_RULES as JS_RULES
 from .python_vulnerabilities import PYTHON_VULN_RULES
 from .java_vulnerabilities import JAVA_VULN_RULES
 from .csharp_vulnerabilities import CSHARP_VULN_RULES
-from .html_reporter import HTMLReporter
+from .report.html_reporter import HTMLReporter
 
 
 class SecurityScanner:
@@ -108,3 +108,19 @@ class SecurityScanner:
             webbrowser.open(f"file://{os.path.abspath(report_path)}")
         
         return report_path
+
+    def generate_pdf_report(
+        self,
+        pdf_output_path: str = "sast_report.pdf",
+        html_output_path: str = "sast_report.html",
+        open_file: bool = True,
+    ):
+        """Generate PDF report from HTML using Playwright."""
+        reporter = HTMLReporter(self.findings, str(self.directory), len(self.source_files))
+        html_path = reporter.generate(html_output_path)
+        pdf_path = reporter.generate_pdf(html_path, pdf_output_path)
+
+        if open_file:
+            webbrowser.open(f"file://{os.path.abspath(pdf_path)}")
+
+        return pdf_path
