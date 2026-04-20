@@ -25,6 +25,7 @@ class HTMLReporter:
             "timestamp": self.timestamp,
             "js_files_count": self.js_files_count,
             "severity_counts": self._count_by_severity(),
+            "severity_unique_counts": self._count_unique_by_severity(),
             "grouped": self._group_by_file(),
             "global_vulnerabilities": self._group_global_vulnerabilities(),
         }
@@ -92,6 +93,24 @@ class HTMLReporter:
         counts = {k: 0 for k in self.severity_order}
         for f in self.findings:
             counts[f['severity']] += 1
+        return counts
+
+    def _count_unique_by_severity(self):
+        """Count unique vulnerability types (rule_id) by severity.
+
+        Repeated hits of the same vulnerability across multiple lines are
+        counted once for executive chart clarity.
+        """
+        counts = {k: 0 for k in self.severity_order}
+        seen_rule_ids = set()
+
+        for finding in self.findings:
+            rule_id = finding["rule_id"]
+            if rule_id in seen_rule_ids:
+                continue
+            seen_rule_ids.add(rule_id)
+            counts[finding["severity"]] += 1
+
         return counts
 
     def _group_by_file(self):

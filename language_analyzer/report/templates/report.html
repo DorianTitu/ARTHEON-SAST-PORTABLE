@@ -320,11 +320,11 @@ pre {
     <th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Info</th>
 </tr>
 <tr>
-    <td>{{ severity_counts.critical }}</td>
-    <td>{{ severity_counts.high }}</td>
-    <td>{{ severity_counts.medium }}</td>
-    <td>{{ severity_counts.low }}</td>
-    <td>{{ severity_counts.info }}</td>
+    <td>{{ severity_unique_counts.critical }}</td>
+    <td>{{ severity_unique_counts.high }}</td>
+    <td>{{ severity_unique_counts.medium }}</td>
+    <td>{{ severity_unique_counts.low }}</td>
+    <td>{{ severity_unique_counts.info }}</td>
 </tr>
 </table>
 
@@ -386,11 +386,11 @@ pre {
 
 <script id="severity-data" type="application/json">
 {{ [
-    severity_counts.critical,
-    severity_counts.high,
-    severity_counts.medium,
-    severity_counts.low,
-    severity_counts.info
+    severity_unique_counts.critical,
+    severity_unique_counts.high,
+    severity_unique_counts.medium,
+    severity_unique_counts.low,
+    severity_unique_counts.info
 ] | tojson }}
 </script>
 
