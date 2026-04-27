@@ -1,1 +1,1 @@
-"""Tests para language_analyzer."""
+"""Tests for language_analyzer."""

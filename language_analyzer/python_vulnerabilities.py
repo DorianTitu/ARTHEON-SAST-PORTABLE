@@ -1,6 +1,6 @@
 PYTHON_VULN_RULES = {
     "eval_exec_usage": {
-        "name": "eval() y exec() Usage",
+        "name": "eval() and exec() Usage",
         "severity": "critical",
         "patterns": [
             r"\beval\s*\(",
@@ -14,19 +14,19 @@ PYTHON_VULN_RULES = {
             r"ast\.literal_eval\s*\(\s*(?![\s]*\[|[\s]*\{)",
             r"pickle\.loads\s*\(",
         ],
-        "description": "eval() y exec() ejecutan código Python arbitrario, permitiendo inyección de código malicioso",
+        "description": "eval() and exec() execute arbitrary Python code, allowing malicious code injection",
         "recommendations": [
-            "Nunca usar eval() o exec() con entrada del usuario",
-            "Para evaluar expresiones, usar ast.literal_eval() solo con literales",
-            "Para JSON, usar json.loads() en lugar de eval()",
-            "Para configuración, usar bibliotecas como configparser",
-            "Considerar usar sandboxes como RestrictedPython",
-            "Implementar whitelisting de funciones permitidas"
+            "Never use eval() or exec() with user input",
+            "To evaluate expressions, use ast.literal_eval() only with literals",
+            "For JSON, use json.loads() instead of eval()",
+            "For configuration, use libraries like configparser",
+            "Consider using sandboxes like RestrictedPython",
+            "Implement whitelisting of allowed functions"
         ]
     },
     
     "hardcoded_secrets": {
-        "name": "Secretos hardcodeados",
+        "name": "Hardcoded Secrets",
         "severity": "critical",
         "patterns": [
             r"(?:password|passwd|pwd)\s*[=:]\s*['\"](?![\s]*['\"])[^'\"]+['\"]",
@@ -40,14 +40,14 @@ PYTHON_VULN_RULES = {
             r"DATABASE_URL\s*=\s*['\"].*:.*@",
             r"(?:aws_access_key|AWS_ACCESS_KEY|aws_secret|AWS_SECRET)\s*[=:]\s*['\"]",
         ],
-        "description": "Credenciales, claves API, tokens y secretos expuestos en código fuente",
+        "description": "Credentials, API keys, tokens, and secrets exposed in source code",
         "recommendations": [
-            "Usar variables de entorno (.env) para almacenar secretos",
-            "Usar python-dotenv para cargar variables de entorno",
-            "Implementar gestores de secretos como AWS Secrets Manager",
-            "Nunca commitar archivos .env al repositorio",
-            "Usar .gitignore para excluir archivos con credenciales",
-            "Rotar todas las credenciales encontradas inmediatamente"
+            "Use environment variables (.env) to store secrets",
+            "Use python-dotenv to load environment variables",
+            "Implement secret managers like AWS Secrets Manager",
+            "Never commit files .env to the repository",
+            "Use .gitignore to exclude credential files",
+            "Rotate all discovered credentials immediately"
         ]
     },
     
@@ -66,14 +66,14 @@ PYTHON_VULN_RULES = {
             r"\.execute\s*\(\s*['\"].*\%.*['\"],\s*(?:.*user|.*input)",
             r"sqlalchemy\.text\s*\(\s*['\"].*\{.*\}['\"]",
         ],
-        "description": "Concatenación de variables en consultas SQL sin usar prepared statements, vulnerables a inyección SQL",
+        "description": "Variable concatenation in SQL queries without prepared statements, vulnerable to SQL injection",
         "recommendations": [
-            "Usar prepared statements con parametrización",
-            "Usar ORMs como SQLAlchemy, Django ORM o Tortoise",
-            "Usar ? para placeholders en lugar de concatenación",
-            "Validar y sanitizar todas las entradas del usuario",
-            "Usar whitelist de valores permitidos",
-            "Implementar principio de menos privilegios en conexiones DB"
+            "Use prepared statements with parameterization",
+            "Use ORMs like SQLAlchemy, Django ORM or Tortoise",
+            "Use ? for placeholders instead of concatenation",
+            "Validate and sanitize all user inputs",
+            "Use a whitelist of allowed values",
+            "Apply the principle of least privilege to DB connections"
         ]
     },
     
@@ -92,14 +92,14 @@ PYTHON_VULN_RULES = {
             r"paramiko\.exec_command\s*\(\s*['\"].*\+",
             r"fabric\.run\s*\(\s*['\"].*\+",
         ],
-        "description": "Ejecución de comandos del sistema con variables sin validar, permite command injection",
+        "description": "System command execution with unvalidated variables allows command injection",
         "recommendations": [
-            "Evitar os.system(), usar subprocess con lista de argumentos",
-            "Nunca pasar shell=True si usa entrada del usuario",
-            "Usar subprocess.run() con lista de argumentos separados",
-            "Validar y sanitizar todas las entradas de usuario",
-            "Usar whitelist de comandos permitidos",
-            "Implementar least privilege para procesos ejecutados"
+            "Avoid os.system(); use subprocess with an argument list",
+            "Never pass shell=True when using user input",
+            "Use subprocess.run() with a separated argument list",
+            "Validate and sanitize all user inputs",
+            "Use a whitelist of allowed commands",
+            "Apply least privilege to executed processes"
         ]
     },
     
@@ -118,14 +118,14 @@ PYTHON_VULN_RULES = {
             r"(?:flask|django)\.request\.(?:data|form|json)",
             r"shelve\.open\s*\(",
         ],
-        "description": "Desserialización insegura de objetos Python permite ejecución de código arbitrario",
+        "description": "Insecure deserialization of Python objects allows arbitrary code execution",
         "recommendations": [
-            "Usar json.loads() en lugar de pickle para datos untrusted",
-            "Si debe usar pickle, validar fuente de datos",
-            "Usar yaml.safe_load() en lugar de yaml.load()",
-            "Implementar validación de tipos después de desserialización",
-            "Considerar firmar datos serializados con HMAC",
-            "Usar librerías seguras como msgpack o protobuf"
+            "Use json.loads() instead of pickle for untrusted data",
+            "If you must use pickle, validate data sources",
+            "Use yaml.safe_load() instead of yaml.load()",
+            "Implement type validation after deserialization",
+            "Consider signing serialized data with HMAC",
+            "Use secure libraries like msgpack or protobuf"
         ]
     },
     
@@ -144,19 +144,19 @@ PYTHON_VULN_RULES = {
             r"pathlib\.Path\.read_text\s*\(\s*['\"].*\.\./",
             r"os\.access\s*\(\s*(?:user_path|filename)\s*,",
         ],
-        "description": "Acceso a archivos con rutas relativas o sin validación permite path traversal",
+        "description": "File access with relative or unvalidated paths can allow path traversal",
         "recommendations": [
-            "Validar rutas solicitadas contra whitelist",
-            "Usar pathlib.Path.resolve() y verificar que está dentro del directorio permitido",
-            "Nunca permitir '..' en rutas de usuario",
-            "Usar os.path.commonpath() para validar ruta base",
-            "Mantener archivos sensibles fuera del directorio web",
-            "Implementar sandboxing de directorios base"
+            "Validate requested paths against a whitelist",
+            "Use pathlib.Path.resolve() and verify it stays within the allowed directory",
+            "Never allow '..' in user paths",
+            "Use os.path.commonpath() to validate the base path",
+            "Keep sensitive files outside the web root",
+            "Implement base-directory sandboxing"
         ]
     },
     
     "insecure_crypto": {
-        "name": "Criptografía insegura",
+        "name": "Insecure Cryptography",
         "severity": "high",
         "patterns": [
             r"hashlib\.md5\s*\(",
@@ -170,19 +170,19 @@ PYTHON_VULN_RULES = {
             r"DES\.|DES3|AES\s*\(\s*mode=AES\.MODE_ECB",
             r"random\.choice\s*\(\s*['\"]",
         ],
-        "description": "Algoritmos criptográficos débiles (MD5, SHA1, DES) o parámetros inseguros",
+        "description": "Weak cryptographic algorithms (MD5, SHA1, DES) or insecure parameters",
         "recommendations": [
-            "Usar SHA-256 o SHA-3 en lugar de MD5/SHA1",
-            "Usar bcrypt o argon2 para hashear contraseñas (rounds >= 12)",
-            "Usar os.urandom() para generar valores aleatorios",
-            "Usar cryptography.io para criptografía simétrica (AES-GCM)",
-            "Nunca usar DES o Triple DES",
-            "Usar librerías modernas como NaCl/libsodium"
+            "Use SHA-256 or SHA-3 instead of MD5/SHA1",
+            "Use bcrypt or argon2 for password hashing (rounds >= 12)",
+            "Use os.urandom() to generate random values",
+            "Use cryptography.io for symmetric cryptography (AES-GCM)",
+            "Never use DES or Triple DES",
+            "Use modern libraries like NaCl/libsodium"
         ]
     },
     
     "no_input_validation": {
-        "name": "Falta de validación de entrada",
+        "name": "Lack of Input Validation",
         "severity": "medium",
         "patterns": [
             r"(?:request\.args|request\.form|request\.json|request\.data)\s*\[\s*['\"].*['\"]",
@@ -196,19 +196,19 @@ PYTHON_VULN_RULES = {
             r"use_strict=False[\s\S]*?(?:request\.|parse)",
             r"@app\.route.*def\s+\w+\s*\(\s*\):",
         ],
-        "description": "Acceso directo a parámetros de entrada sin validación ni sanitización",
+        "description": "Direct access to input parameters without validation or sanitization",
         "recommendations": [
-            "Usar Pydantic para validación de modelos",
-            "Usar marshmallow para serialización/validación",
-            "Usar Cerberus para validación de esquemas",
-            "Implementar middleware de validación",
-            "Sanitizar todas las entradas del usuario",
-            "Usar whitelist de valores permitidos"
+            "Use Pydantic for model validation",
+            "Use marshmallow for serialization/validation",
+            "Use Cerberus for schema validation",
+            "Implement middleware validation",
+            "Sanitize all user inputs",
+            "Use a whitelist of allowed values"
         ]
     },
     
     "insecure_dependencies": {
-        "name": "Dependencias inseguras",
+        "name": "Insecure Dependencies",
         "severity": "medium",
         "patterns": [
             r"requests\s*==\s*(?:2\.(?:[0-9]|1[0-9]|2[0-6])|2\.25)",
@@ -222,14 +222,14 @@ PYTHON_VULN_RULES = {
             r"pillow\s*==\s*(?:[0-7]\.)",
             r"requirements\.txt.*insecure|requirements\.txt.*--allow-external",
         ],
-        "description": "Uso de versiones conocidas de librerías con vulnerabilidades registradas",
+        "description": "Use of known vulnerable library versions",
         "recommendations": [
-            "Actualizar todas las dependencias a versiones seguras",
-            "Usar pip-audit para identificar vulnerabilidades",
-            "Usar poetry o pipenv para gestión de dependencias",
-            "Implementar actualizaciones automáticas con dependabot",
-            "Revisar el changelog antes de actualizar",
-            "Usar requirements.txt con versiones pinned"
+            "Update all dependencies to secure versions",
+            "Use pip-audit to identify vulnerabilities",
+            "Use poetry or pipenv for dependency management",
+            "Implement automatic updates with dependabot",
+            "Review the changelog before updating",
+            "Use requirements.txt with pinned versions"
         ]
     },
     
@@ -248,14 +248,14 @@ PYTHON_VULN_RULES = {
             r"untrusted_data[\s\S]*?parse\s*\(",
             r"request\.files\s*\[.*\][\s\S]*?xml\.parse",
         ],
-        "description": "Procesamiento de XML con entidades externas habilitadas permite lectura de archivos o DoS",
+        "description": "XML processing with external entities enabled can allow file disclosure or DoS",
         "recommendations": [
-            "Usar defusedxml en lugar de xml estándar",
-            "Deshabilitar DTD y entidades externas en parsers",
-            "Usar lxml con xmlschema para validación",
-            "Validar y sanitizar entrada XML",
-            "Implementar límites en tamaño de archivos",
-            "Usar whitelist de elementos XML permitidos"
+            "Use defusedxml instead of xml standard",
+            "Disable DTD and external entities in parsers",
+            "Use lxml with xmlschema for validation",
+            "Validate and sanitize XML input",
+            "Implement file size limits",
+            "Use a whitelist of allowed XML elements"
         ]
     },
 
@@ -274,19 +274,19 @@ PYTHON_VULN_RULES = {
             r"if\s+not\s+user:\s+return",
             r"return\s+jsonify\s*\(.*(?:username|password|data).*\)"
         ],
-        "description": "Acceso directo a objetos por identificador controlado por usuario sin validar autorización de acceso (IDOR)",
+        "description": "Direct access to objects via user-controlled identifiers without validating access authorization (IDOR)",
         "recommendations": [
-            "Verificar ownership/autorización por recurso antes de operar",
-            "No confiar en IDs enviados por cliente",
-            "Aplicar controles de acceso a nivel de objeto",
-            "Usar identificadores opacos cuando sea posible",
-            "Registrar acceso a recursos sensibles",
-            "Agregar pruebas de acceso cruzado entre usuarios"
+            "Verify ownership/authorization per resource before operating",
+            "Do not trust IDs sent by clients",
+            "Apply object-level access controls",
+            "Use opaque identifiers when it is possible",
+            "Log access to sensitive resources",
+            "Add cross-user access tests"
         ]
     },
 
     "debug_endpoint_exposure": {
-        "name": "Exposición de información sensible (debug endpoint)",
+        "name": "Sensitive Information Exposure (Debug Endpoint)",
         "severity": "medium",
         "patterns": [
             r"@app\.route\s*\(\s*['\"](?:/debug|/__debug__|/internal|/api/dev)",
@@ -300,19 +300,19 @@ PYTHON_VULN_RULES = {
             r"print\s*\(\s*request\.(?:headers|cookies|environ|full_path)",
             r"settings\.DEBUG\s*=\s*True"
         ],
-        "description": "Endpoints/modos de depuración pueden exponer stack traces, entorno y datos sensibles",
+        "description": "Debug endpoints/modes can expose stack traces, environment details, and sensitive data",
         "recommendations": [
-            "Desactivar modo debug en producción",
-            "No exponer stack trace al cliente final",
-            "Restringir endpoints internos de diagnóstico",
-            "Evitar imprimir secretos en logs",
-            "Usar respuestas de error genéricas para clientes",
-            "Separar logs técnicos de respuestas HTTP"
+            "Disable debug mode in production",
+            "Do not expose stack traces to end users",
+            "Restrict internal diagnostic endpoints",
+            "Avoid printing secrets in logs",
+            "Use generic error responses for clients",
+            "Separate technical logs from HTTP responses"
         ]
     },
 
     "jwt_auth_mismanagement": {
-        "name": "Mala gestión de autenticación con JWT",
+        "name": "JWT Authentication Mismanagement",
         "severity": "high",
         "patterns": [
             r"jwt\.encode\s*\(\s*.*\s*,\s*['\"][^'\"]+['\"]",
@@ -326,14 +326,14 @@ PYTHON_VULN_RULES = {
             r"from\s+jwt\s+import\s+decode",
             r"authorization\s*=\s*request\.headers\.get\s*\(\s*['\"]Authorization['\"]"
         ],
-        "description": "Uso inseguro de JWT por secretos hardcodeados, validaciones deshabilitadas o expiraciones débiles",
+        "description": "Insecure JWT usage due to hardcoded secrets, disabled validations, or weak expirations",
         "recommendations": [
-            "Almacenar secretos JWT fuera del código fuente",
-            "Validar firma, expiración, issuer y audience",
-            "No permitir algoritmo none",
-            "Usar expiraciones cortas y refresh tokens controlados",
-            "Rotar claves de firma periódicamente",
-            "Invalidar tokens comprometidos mediante blacklist"
+            "Store JWT secrets outside source code",
+            "Validate signature, expiration, issuer and audience",
+            "Do not allow algorithm none",
+            "Use short expirations and controlled refresh tokens",
+            "Rotate signature keys periodically",
+            "Invalidate compromised tokens through a blacklist"
         ]
     },
 
@@ -352,14 +352,14 @@ PYTHON_VULN_RULES = {
             r"token\s*=\s*jwt\.encode\s*\(.*\)",
             r"except\s+Exception\s+as\s+e[\s\S]{0,100}return\s+f?['\"].*\{?str\s*\(\s*e\s*\)?\}?"
         ],
-        "description": "Manipulación manual del token JWT o validación parcial puede permitir suplantación y escalación de privilegios",
+        "description": "Manual JWT token manipulation or partial validation can allow impersonation and privilege escalation",
         "recommendations": [
-            "No decodificar claims para autorización sin verificar firma",
-            "Validar algoritmo permitido explícitamente",
-            "Rechazar tokens con alg=none",
-            "Comprobar firma y metadatos del token en cada solicitud",
-            "Auditar eventos de token inválido/manipulado",
-            "Usar librerías JWT mantenidas y configuración segura"
+            "Do not decode claims for authorization without signature verification",
+            "Validate allowed algorithm explicitly",
+            "Reject tokens with alg=none",
+            "Validate token signature and metadata on every request",
+            "Audit invalid/manipulated token events",
+            "Use maintained JWT libraries with secure configuration"
         ]
     }
 }

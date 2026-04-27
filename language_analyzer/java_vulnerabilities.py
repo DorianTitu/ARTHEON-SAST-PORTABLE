@@ -14,14 +14,14 @@ JAVA_VULN_RULES = {
             r"@Query\s*\(\s*value\s*=\s*['\"].*\+",
             r"PreparedStatement.*(?:!|!=)\s*",
         ],
-        "description": "Concatenación de variables en consultas SQL sin usar prepared statements, vulnerables a inyección SQL",
+        "description": "Variable concatenation in SQL queries without prepared statements, vulnerable to SQL injection",
         "recommendations": [
-            "Usar PreparedStatement con setString(), setInt(), etc",
-            "Usar ORMs como Hibernate, JPA o Spring Data",
-            "Usar @Query con parametrización en Spring Data",
-            "Validar y sanitizar todas las entradas del usuario",
-            "Usar whitelist de valores permitidos",
-            "Implementar principio de menos privilegios en conexiones DB"
+            "Use PreparedStatement with setString(), setInt(), etc",
+            "Use ORMs like Hibernate, JPA or Spring Data",
+            "Use @Query with parameterization in Spring Data",
+            "Validate and sanitize all user inputs",
+            "Use a whitelist of allowed values",
+            "Apply the principle of least privilege to DB connections"
         ]
     },
     
@@ -40,14 +40,14 @@ JAVA_VULN_RULES = {
             r"/bin/sh.*-c.*\+",
             r"cmd\.exe.*\/c.*\+",
         ],
-        "description": "Ejecución de comandos del sistema con variables sin validar, permite command injection",
+        "description": "System command execution with unvalidated variables allows command injection",
         "recommendations": [
-            "Usar ProcessBuilder con lista de argumentos separados",
-            "Nunca concatenar strings en comandos",
-            "Usar whitelisting de comandos permitidos",
-            "Validar y sanitizar todas las entradas de usuario",
-            "Evitar pasar datos de usuario directamente a exec",
-            "Implementar least privilege para procesos ejecutados"
+            "Use ProcessBuilder with a separated argument list",
+            "Never concatenate strings in commands",
+            "Use a whitelist of allowed commands",
+            "Validate and sanitize all user inputs",
+            "Avoid passing user data directly to exec",
+            "Apply least privilege to executed processes"
         ]
     },
     
@@ -66,19 +66,19 @@ JAVA_VULN_RULES = {
             r"XPath\.evaluate\s*\(\s*['\"].*\+",
             r"DocumentBuilder\.parse\s*\(\s*\w+Input",
         ],
-        "description": "Procesamiento de XML con entidades externas habilitadas permite lectura de archivos o DoS",
+        "description": "XML processing with external entities enabled can allow file disclosure or DoS",
         "recommendations": [
-            "Deshabilitar XXE mediante setFeature con DISALLOW_DOCTYPE_DECL",
-            "Usar OWASP XXE Prevention Cheat Sheet",
-            "Usar bibliotecas seguras como XStream",
-            "Validar y sanitizar entrada XML",
-            "Implementar límites en tamaño de archivos",
-            "Usar whitelisting de elementos XML permitidos"
+            "Disable XXE using setFeature with DISALLOW_DOCTYPE_DECL",
+            "Use OWASP XXE Prevention Cheat Sheet",
+            "Use secure libraries like XStream",
+            "Validate and sanitize XML input",
+            "Implement file size limits",
+            "Use a whitelist of allowed XML elements"
         ]
     },
     
     "hardcoded_secrets": {
-        "name": "Secretos hardcodeados",
+        "name": "Hardcoded Secrets",
         "severity": "critical",
         "patterns": [
             r"password\s*[=:]\s*['\"](?![\s]*['\"])[^'\"]+['\"]",
@@ -92,14 +92,14 @@ JAVA_VULN_RULES = {
             r"System\.getenv\s*\(\s*['\"](?:API_KEY|SECRET|PASSWORD|TOKEN)",
             r"Properties\.load.*password|secret",
         ],
-        "description": "Credenciales, claves API, tokens y secretos expuestos en código fuente",
+        "description": "Credentials, API keys, tokens, and secrets exposed in source code",
         "recommendations": [
-            "Usar variables de entorno para almacenar secretos",
-            "Usar gestores de secretos como HashiCorp Vault",
-            "Usar Spring Cloud Config Server para configuración sensible",
-            "Nunca commitar archivos con credenciales al repositorio",
-            "Usar .gitignore para excluir archivos secretos",
-            "Rotar todas las credenciales encontradas inmediatamente"
+            "Use environment variables to store secrets",
+            "Use secret managers like HashiCorp Vault",
+            "Use Spring Cloud Config Server for sensitive configuration",
+            "Never commit files with credentials to the repository",
+            "Use .gitignore to exclude secret files",
+            "Rotate all discovered credentials immediately"
         ]
     },
     
@@ -118,19 +118,19 @@ JAVA_VULN_RULES = {
             r"unmarshaller\.unmarshal\s*\(\s*untrusted",
             r"(?:jsonObject|jsonArray)\.getObject\s*\(",
         ],
-        "description": "Desserialización insegura de objetos Java permite ejecución de código arbitrario",
+        "description": "Insecure deserialization of Java objects allows arbitrary code execution",
         "recommendations": [
-            "Usar JSON (Jackson, Gson) en lugar de serialización Java",
-            "Implementar ObjectInputFilter para filtrar clases",
-            "Usar NotSerializable interface en clases sensibles",
-            "Validar fuente de datos antes de desserializar",
-            "Considerar firmar datos serializados con HMAC",
-            "Usar librerías seguras como Protobuf"
+            "Use JSON (Jackson, Gson) instead of Java serialization",
+            "Implement ObjectInputFilter to filter classes",
+            "Use the NotSerializable interface for sensitive classes",
+            "Validate data sources before deserializing",
+            "Consider signing serialized data with HMAC",
+            "Use secure libraries like Protobuf"
         ]
     },
     
     "insecure_crypto": {
-        "name": "Criptografía insegura",
+        "name": "Insecure Cryptography",
         "severity": "high",
         "patterns": [
             r"MessageDigest\.getInstance\s*\(\s*['\"]MD5['\"]",
@@ -144,14 +144,14 @@ JAVA_VULN_RULES = {
             r"KeyGenerator\.getInstance\s*\(\s*['\"]DES",
             r"new\s+IvParameterSpec\s*\(\s*new\s+byte\[\]\s*\{",
         ],
-        "description": "Algoritmos criptográficos débiles (MD5, SHA1, DES, ECB) o parámetros inseguros",
+        "description": "Weak cryptographic algorithms (MD5, SHA1, DES, ECB) or insecure parameters",
         "recommendations": [
-            "Usar SHA-256 o SHA-3 en lugar de MD5/SHA1",
-            "Usar bcrypt o PBKDF2 para hashear contraseñas",
-            "Usar AES-GCM en lugar de DES o ECB",
-            "Generar IVs aleatorios con SecureRandom",
-            "Usar librerías como Bouncy Castle para criptografía",
-            "Nunca usar algoritmos débiles como DES"
+            "Use SHA-256 or SHA-3 instead of MD5/SHA1",
+            "Use bcrypt or PBKDF2 for password hashing",
+            "Use AES-GCM instead of DES or ECB",
+            "Generate random IVs with SecureRandom",
+            "Use libraries like Bouncy Castle for cryptography",
+            "Never use weak algorithms like DES"
         ]
     },
     
@@ -170,14 +170,14 @@ JAVA_VULN_RULES = {
             r"RandomAccessFile\s*\(\s*(?:.*\.\.|userInput)",
             r"ZipInputStream\.getNextEntry\s*\(\s*\)[\s\S]*?\.\.",
         ],
-        "description": "Acceso a archivos con rutas relativas o sin validación permite path traversal",
+        "description": "File access with relative or unvalidated paths can allow path traversal",
         "recommendations": [
-            "Validar rutas solicitadas contra whitelist",
-            "Usar Path.normalize() y verificar que está dentro del directorio permitido",
-            "Nunca permitir '..' en rutas de usuario",
-            "Usar java.nio.file.Files.walkFileTree() con SecureDirectoryStream",
-            "Mantener archivos sensibles fuera del directorio web",
-            "Implementar sandboxing de directorios base"
+            "Validate requested paths against a whitelist",
+            "Use Path.normalize() and verify it stays within the allowed directory",
+            "Never permitir '..' en user paths",
+            "Use java.nio.file.Files.walkFileTree() with SecureDirectoryStream",
+            "Keep sensitive files outside the web root",
+            "Implement base-directory sandboxing"
         ]
     },
     
@@ -196,19 +196,19 @@ JAVA_VULN_RULES = {
             r"dangerouslySetInnerHTML",
             r"innerHTML\s*=\s*(?:request\.|userInput)",
         ],
-        "description": "Inyección de contenido HTML/JavaScript sin sanitizar permite XSS",
+        "description": "Unsanitized HTML/JavaScript injection allows XSS",
         "recommendations": [
-            "Usar OWASP ESAPI Encoder para escapar salida",
-            "Usar templating engines con auto-escape (Thymeleaf, Velocity)",
-            "Implementar Content Security Policy (CSP) headers",
-            "Escapar caracteres especiales (<, >, &, \", ')",
-            "Validar y sanitizar todas las entradas del usuario",
-            "Usar whitelist de caracteres permitidos"
+            "Use OWASP ESAPI Encoder to escape output",
+            "Use templating engines with auto-escape (Thymeleaf, Velocity)",
+            "Implement Content Security Policy (CSP) headers",
+            "Escape special characters (<, >, &, \", ')",
+            "Validate and sanitize all user inputs",
+            "Use a whitelist of allowed characters"
         ]
     },
     
     "insecure_http_headers": {
-        "name": "Encabezados HTTP inseguros",
+        "name": "Insecure HTTP Headers",
         "severity": "medium",
         "patterns": [
             r"response\.setHeader\s*\(\s*['\"](?:X-Frame-Options|X-Content-Type-Options|Strict-Transport-Security)['\"],\s*['\"]['\"]",
@@ -222,19 +222,19 @@ JAVA_VULN_RULES = {
             r"disableContentSecurityPolicy\s*=\s*true",
             r"enableXssProtection\s*=\s*false",
         ],
-        "description": "Encabezados HTTP faltantes o mal configurados pueden permitir ataques",
+        "description": "Missing or misconfigured HTTP headers can enable attacks",
         "recommendations": [
-            "Implementar X-Frame-Options: DENY",
-            "Implementar X-Content-Type-Options: nosniff",
-            "Implementar Strict-Transport-Security",
-            "Especificar orígenes permitidos en CORS",
-            "Implementar Content-Security-Policy",
-            "Usar Secure, HttpOnly en cookies"
+            "Implement X-Frame-Options: DENY",
+            "Implement X-Content-Type-Options: nosniff",
+            "Implement Strict-Transport-Security",
+            "Specify allowed origins en CORS",
+            "Implement Content-Security-Policy",
+            "Use Secure and HttpOnly cookie flags"
         ]
     },
     
     "weak_authentication": {
-        "name": "Autenticación débil",
+        "name": "Weak Authentication",
         "severity": "high",
         "patterns": [
             r"password\.equals\s*\(",
@@ -248,14 +248,14 @@ JAVA_VULN_RULES = {
             r"session\.setAttribute\s*\(\s*['\"]userId['\"],\s*(?:request\.|param)",
             r"@PreAuthorize\s*\(\s*['\"]permitAll\(\)['\"]",
         ],
-        "description": "Implementación de autenticación débil o validación incorrecta",
+        "description": "Weak authentication implementation or incorrect validation",
         "recommendations": [
-            "Usar MessageDigest.isEqual() para comparar strings sensibles",
-            "Usar bcrypt o PBKDF2 para hashear contraseñas",
-            "Implementar autenticación multifactor (MFA)",
-            "Usar JWT con secretos fuertes",
-            "Implementar rate limiting en intentos de login",
-            "Usar tokens seguros con expiration"
+            "Use MessageDigest.isEqual() to compare sensitive strings",
+            "Use bcrypt or PBKDF2 for hashear passwords",
+            "Implement multi-factor authentication (MFA)",
+            "Use JWT with strong secrets",
+            "Apply rate limiting to login attempts",
+            "Use secure tokens with expiration"
         ]
     },
 
@@ -274,19 +274,19 @@ JAVA_VULN_RULES = {
             r"return\s+ResponseEntity\.ok\s*\(\s*\w+\s*\)",
             r"@RequestParam\s*\(\s*['\"]id['\"]\s*\)"
         ],
-        "description": "Acceso a objetos por ID controlado por usuario sin control de autorización por recurso (IDOR)",
+        "description": "Object access by user-controlled ID without resource-level authorization controls (IDOR)",
         "recommendations": [
-            "Validar ownership/autorización del recurso antes de leer o modificar",
-            "No confiar en IDs recibidos por path/query/body",
-            "Aplicar autorización a nivel de objeto (method security + ABAC/RBAC)",
-            "Usar identificadores opacos cuando sea viable",
-            "Registrar eventos de acceso a recursos sensibles",
-            "Agregar pruebas de acceso cruzado entre usuarios"
+            "Validate resource ownership/authorization before reading or modifying",
+            "Do not trust IDs received through path/query/body",
+            "Apply object-level authorization (method security + ABAC/RBAC)",
+            "Use opaque identifiers when viable",
+            "Log access events for sensitive resources",
+            "Add cross-user access tests"
         ]
     },
 
     "debug_endpoint_exposure": {
-        "name": "Exposición de información sensible (debug endpoint)",
+        "name": "Sensitive Information Exposure (Debug Endpoint)",
         "severity": "medium",
         "patterns": [
             r"@RequestMapping\s*\(\s*['\"]/debug",
@@ -300,19 +300,19 @@ JAVA_VULN_RULES = {
             r"System\.out\.println\s*\(\s*System\.getenv\s*\(",
             r"spring\.devtools\.restart\.enabled\s*=\s*true"
         ],
-        "description": "Endpoints o configuración de debug pueden exponer stack traces, entorno y configuración sensible",
+        "description": "Debug endpoints or configuration can expose stack traces, environment details, and sensitive configuration",
         "recommendations": [
-            "Deshabilitar endpoints de depuración en producción",
-            "No exponer stack traces al cliente",
-            "Restringir endpoints Actuator con autenticación/autorización",
-            "No loggear secretos ni variables sensibles",
-            "Usar mensajes de error genéricos hacia cliente",
-            "Separar perfiles de configuración dev/prod"
+            "Disable debugging endpoints in production",
+            "Do not expose stack traces to clients",
+            "Restrict endpoints Actuator with authentication/authorization",
+            "Do not loggear secrets ni variables sensibles",
+            "Use generic error messages for clients",
+            "Separate dev/prod configuration profiles"
         ]
     },
 
     "jwt_auth_mismanagement": {
-        "name": "Mala gestión de autenticación con JWT",
+        "name": "JWT Authentication Mismanagement",
         "severity": "high",
         "patterns": [
             r"setSigningKey\s*\(\s*['\"][^'\"]+['\"]\s*\)",
@@ -326,14 +326,14 @@ JAVA_VULN_RULES = {
             r"SECRET_KEY\s*=\s*['\"][^'\"]+['\"]",
             r"jwtSecret\s*=\s*['\"][^'\"]+['\"]"
         ],
-        "description": "Configuración insegura de JWT por secretos hardcodeados o validaciones incompletas",
+        "description": "Insecure JWT configuration due to hardcoded secrets or incomplete validations",
         "recommendations": [
-            "Guardar secretos/llaves fuera del código fuente",
-            "Validar firma, issuer, audience y expiración",
-            "Rechazar algoritmo none y limitar algoritmos permitidos",
-            "Usar expiración corta y rotación de claves",
-            "Agregar revocación de tokens cuando aplique",
-            "Instrumentar monitoreo de fallos de validación JWT"
+            "Store secrets/keys outside source code",
+            "Validate signature, issuer, audience and expiration",
+            "Reject algorithm none and restrict allowed algorithms",
+            "Use short expirations and key rotation",
+            "Add token revocation when applicable",
+            "Instrument monitoring of JWT validation failures"
         ]
     },
 
@@ -352,14 +352,14 @@ JAVA_VULN_RULES = {
             r"header\.put\s*\(\s*['\"]alg['\"]\s*,\s*['\"]none['\"]",
             r"token\s*=\s*header\s*\+\s*['\"]\\.['\"]\s*\+\s*payload"
         ],
-        "description": "Manipulación manual del JWT o uso de claims sin verificar firma permite suplantación de identidad",
+        "description": "Manual JWT manipulation or use of claims without signature verification allows identity spoofing",
         "recommendations": [
-            "No confiar en claims decodificados sin verificación criptográfica",
-            "Validar firma y metadatos del token en cada request",
-            "Restringir estrictamente algoritmos permitidos",
-            "Rechazar tokens con alg=none",
-            "Usar bibliotecas JWT mantenidas con defaults seguros",
-            "Agregar detección y alertas para intentos de token manipulado"
+            "Do not trust in decoded claims without verification criptogr�fica",
+            "Validate token signature and metadata on every request",
+            "Strictly restrict allowed algorithms",
+            "Reject tokens with alg=none",
+            "Use maintained JWT libraries with secure defaults",
+            "Add detection and alerts for manipulated token attempts"
         ]
     }
 }

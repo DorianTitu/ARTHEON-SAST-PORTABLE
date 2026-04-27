@@ -11,7 +11,7 @@ def test_scanner_initialization():
 
 def test_scanner_invalid_directory():
     with pytest.raises(ValueError):
-        SecurityScanner("/ruta/inexistente/12345")
+        SecurityScanner("/nonexistent/path/12345")
 
 
 def test_scan_empty_directory():

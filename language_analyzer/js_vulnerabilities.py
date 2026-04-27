@@ -1,6 +1,6 @@
 VULN_RULES = {
     "eval_usage": {
-        "name": "Uso de eval()",
+        "name": "Use of eval()",
         "severity": "critical",
         "patterns": [
             r"\beval\s*\(",
@@ -14,18 +14,18 @@ VULN_RULES = {
             r"vm\.runInThisContext\s*\(",
             r"vm\.runInNewContext\s*\(",
         ],
-        "description": "eval() y funciones similares ejecutan código arbitrario, permiten inyección de código",
+        "description": "eval() and similar functions execute arbitrary code and enable code injection",
         "recommendations": [
-            "Nunca utilizar eval() con entrada del usuario",
-            "Usar JSON.parse() en lugar de eval() para parsear JSON",
-            "Implementar un parser seguro o una DSL interpretada",
-            "Considerar usar Web Workers para código aislado",
-            "Usar bibliotecas como jexl o expr-eval para expresiones seguras"
+            "Never use eval() with user input",
+            "Use JSON.parse() instead of eval() to parse JSON",
+            "Implement a secure parser or an interpreted DSL",
+            "Consider using Web Workers for isolated code",
+            "Use libraries like jexl or expr-eval for safe expressions"
         ]
     },
     
     "hardcoded_secrets": {
-        "name": "Secretos hardcodeados",
+        "name": "Hardcoded Secrets",
         "severity": "critical",
         "patterns": [
             r"(?:password|passwd|pwd)\s*[=:]\s*['\"](?![\s]*['\"])[^'\"]+['\"]",
@@ -39,14 +39,14 @@ VULN_RULES = {
             r"(?:stripe_key|stripeKey|STRIPE_KEY)\s*[=:]\s*['\"]sk_(?:test|live)_[^'\"]+['\"]",
             r"(?:mongodb_uri|MONGODB_URI|mongodb_password)\s*[=:]\s*['\"](?![\s]*['\"])[^'\"]*(?:mongodb|password).*['\"]",
         ],
-        "description": "Credenciales, claves API, tokens y secretos expuestos en código fuente",
+        "description": "Credentials, API keys, tokens, and secrets exposed in source code",
         "recommendations": [
-            "Usar variables de entorno (.env) para almacenar secretos",
-            "Utilizar gestores de secretos como AWS Secrets Manager o HashiCorp Vault",
-            "Nunca commitar archivos .env al repositorio",
-            "Implementar .gitignore para excluir archivos con credenciales",
-            "Rotar todas las credenciales encontradas inmediatamente",
-            "Usar bibliotecas como dotenv para cargar variables de entorno"
+            "Use environment variables (.env) to store secrets",
+            "Use secret managers such as AWS Secrets Manager or HashiCorp Vault",
+            "Never commit .env files to the repository",
+            "Use .gitignore to exclude credential files",
+            "Rotate all discovered credentials immediately",
+            "Use libraries like dotenv to load environment variables"
         ]
     },
     
@@ -65,14 +65,14 @@ VULN_RULES = {
             r"mysql\.query\s*\(\s*['\"`].*(?:\+|\.concat|\$\{|\`.*\$\{).*['\"`]",
             r"pool\.query\s*\(\s*['\"`].*(?:\+|\.concat|\$\{|\`.*\$\{).*['\"`]",
         ],
-        "description": "Concatenación de variables en consultas SQL sin sanitizar, vulnerables a inyección SQL",
+        "description": "Variable concatenation in SQL queries without sanitization is vulnerable to SQL injection",
         "recommendations": [
-            "Usar prepared statements o parameterized queries",
-            "Utilizar ORM como Sequelize, TypeORM o Knex.js",
-            "Validar y sanitizar todas las entradas del usuario",
-            "Implementar whitelist de valores permitidos",
-            "Usar stored procedures en la base de datos",
-            "Aplicar principio de menos privilegios en conexiones DB"
+            "Use prepared statements or parameterized queries",
+            "Use ORMs like Sequelize, TypeORM, or Knex.js",
+            "Validate and sanitize all user input",
+            "Use a whitelist of allowed values",
+            "Use stored procedures in the database",
+            "Apply least-privilege principles to DB connections"
         ]
     },
     
@@ -91,14 +91,14 @@ VULN_RULES = {
             r"require\(['\"]child_process['\"]\).*(?:exec|spawn).*\+\s*(?:req\.|params\.|query\.)",
             r"\.exec\s*\(\s*['\"`]\s*.*(?:\+|\.concat|\$\{)",
         ],
-        "description": "Ejecución de comandos del sistema con variables sin validar, permite command injection",
+        "description": "Executing system commands with unvalidated variables enables command injection",
         "recommendations": [
-            "Evitar exec(), execSync() y spawn() con entrada del usuario",
-            "Usar spawn() con array de argumentos en lugar de strings",
-            "Nunca pasar shell: true a menos que sea absolutamente necesario",
-            "Validar y sanitizar todas las entradas de usuario",
-            "Usar whitelist de comandos permitidos",
-            "Implementar least privilege para procesos ejecutados"
+            "Avoid exec(), execSync(), and spawn() with user input",
+            "Use spawn() with an argument array instead of raw strings",
+            "Never set shell: true unless absolutely necessary",
+            "Validate and sanitize all user input",
+            "Use a whitelist of allowed commands",
+            "Apply least privilege to executed processes"
         ]
     },
     
@@ -121,19 +121,19 @@ VULN_RULES = {
             r"\.html\s*\(\s*\$\{.*\}\s*\)",
             r"jQuery.*\.html\s*\(\s*(?!.*(?:sanitize|escape))",
         ],
-        "description": "Asignación directa de contenido HTML sin sanitizar permite XSS",
+        "description": "Direct assignment of unsanitized HTML content enables XSS",
         "recommendations": [
-            "Usar textContent en lugar de innerHTML cuando sea posible",
-            "Sanitizar toda entrada del usuario con DOMPurify",
-            "Usar Content Security Policy (CSP) headers",
-            "Escapar caracteres especiales (<, >, &, \", ')",
-            "Usar plantillas con auto-escape (template literals con librerías)",
-            "Implementar X-XSS-Protection headers"
+            "Use textContent instead of innerHTML whenever possible",
+            "Sanitize all user input with DOMPurify",
+            "Use Content Security Policy (CSP) headers",
+            "Escape special characters (<, >, &, \", ')",
+            "Use templates with auto-escaping (template literals with libraries)",
+            "Set X-XSS-Protection headers"
         ]
     },
     
     "insecure_crypto": {
-        "name": "Criptografía insegura",
+        "name": "Insecure Cryptography",
         "severity": "high",
         "patterns": [
             r"(?:crypto\.createHash|createHash)\s*\(\s*['\"](?:md5|sha1)['\"]",
@@ -149,14 +149,14 @@ VULN_RULES = {
             r"jwt\.sign\s*\(\s*[^,]*,\s*['\"].*['\"]",
             r"jsonwebtoken.*sign.*(?:md5|sha1|['\"]secret['\"])",
         ],
-        "description": "Algoritmos criptográficos débiles (MD5, SHA1) o parámetros inseguros",
+        "description": "Weak cryptographic algorithms (MD5, SHA1) or insecure parameters",
         "recommendations": [
-            "Usar SHA-256 o superior en lugar de MD5/SHA1",
-            "Usar bcrypt o scrypt para hashear contraseñas (rounds >= 10)",
-            "Usar crypto.createCipheriv en lugar de createCipher",
-            "Generar valores aleatorios con crypto.randomBytes()",
-            "Usar librerías especializadas para JWT (jsonwebtoken con secretos fuertes)",
-            "Implementar key derivation functions (PBKDF2, Argon2)"
+            "Use SHA-256 or stronger instead of MD5/SHA1",
+            "Use bcrypt or scrypt for password hashing (rounds >= 10)",
+            "Use crypto.createCipheriv instead of createCipher",
+            "Generate random values with crypto.randomBytes()",
+            "Use dedicated JWT libraries (jsonwebtoken with strong secrets)",
+            "Implement key derivation functions (PBKDF2, Argon2)"
         ]
     },
     
@@ -176,19 +176,19 @@ VULN_RULES = {
             r"sendFile\s*\(\s*(?:req\.|query\.|params\.)",
             r"fs\.readdirSync\s*\(\s*(?:path\.|__dirname)\s*\+\s*(?:req\.|query\.|params\.)",
         ],
-        "description": "Acceso a archivos con rutas relativas sin validación permite path traversal",
+        "description": "File access with relative or unvalidated paths enables path traversal",
         "recommendations": [
-            "Validar rutas solicitadas contra whitelist",
-            "Usar path.resolve() y verificar que está dentro del directorio permitido",
-            "Nunca permitir '..' en rutas de usuario",
-            "Implementar sandboxing de directorios base",
-            "Usar fs.access() antes de leer archivos",
-            "Mantener archivos sensibles fuera del directorio web"
+            "Validate requested paths against a whitelist",
+            "Use path.resolve() and verify the path stays inside the allowed directory",
+            "Never allow '..' in user paths",
+            "Implement base-directory sandboxing",
+            "Use fs.access() before reading files",
+            "Keep sensitive files outside the web root"
         ]
     },
     
     "insecure_dependencies": {
-        "name": "Dependencias inseguras",
+        "name": "Insecure Dependencies",
         "severity": "medium",
         "patterns": [
             r"(?:\"lodash\":|\"lodash\":|'lodash':)\s*['\"][\s\S]*?(?:[0-9]\.){2}[0-9](?:\.[0-9])?['\"]",
@@ -203,19 +203,19 @@ VULN_RULES = {
             r"(?:\"fs-extra\":|'fs-extra':)\s*['\"](?:[0-2]\.)['\"]",
             r"\"vulnerabilities\"\s*:\s*\[",
         ],
-        "description": "Uso de versiones conocidas de librerías con vulnerabilidades registradas",
+        "description": "Use of known library versions with documented vulnerabilities",
         "recommendations": [
-            "Actualizar todas las dependencias a versiones seguras",
-            "Usar npm audit para identificar vulnerabilidades",
-            "Implementar npm audit fix regularmente",
-            "Usar dependabot o similar para actualizaciones automáticas",
-            "Revisar el changelog antes de actualizar",
-            "Mantener un registro de dependencias en package.json"
+            "Update all dependencies to secure versions",
+            "Use npm audit to identify vulnerabilities",
+            "Run npm audit fix regularly",
+            "Use Dependabot or similar tools for automated updates",
+            "Review the changelog before upgrading",
+            "Maintain a dependency inventory in package.json"
         ]
     },
     
     "no_input_validation": {
-        "name": "Falta de validación de entrada",
+        "name": "Missing Input Validation",
         "severity": "medium",
         "patterns": [
             r"(?:req\.body|req\.query|req\.params)\.[a-zA-Z_]\w*\s*(?:==|===|\+|-|\/|\*|>|<|\||&|&&)",
@@ -229,19 +229,19 @@ VULN_RULES = {
             r"\.forEach\s*\(\s*(?:req\.body|req\.query|req\.params)",
             r"const\s+[a-zA-Z_]\w*\s*=\s*(?:req\.body|req\.query|req\.params)\.[a-zA-Z_]\w*(?:;|\s)",
         ],
-        "description": "Acceso directo a parámetros de entrada sin validación ni sanitización",
+        "description": "Direct access to input parameters without validation or sanitization",
         "recommendations": [
-            "Usar librerías de validación como joi, yup o express-validator",
-            "Implementar middleware de validación en rutas",
-            "Sanitizar todas las entradas del usuario",
-            "Usar tipo de datos específicos (parseInt, parseFloat, etc)",
-            "Implementar whitelist de valores permitidos",
-            "Rechazar valores inesperados o fuera de rango"
+            "Use validation libraries such as joi, yup, or express-validator",
+            "Implement validation middleware on routes",
+            "Sanitize all user input",
+            "Use specific data types (parseInt, parseFloat, etc.)",
+            "Use a whitelist of allowed values",
+            "Reject unexpected or out-of-range values"
         ]
     },
     
     "insecure_cors": {
-        "name": "CORS inseguro",
+        "name": "Insecure CORS",
         "severity": "medium",
         "patterns": [
             r"(?:Access-Control-Allow-Origin|origin)\s*[=:]\s*['\"]?\*['\"]?",
@@ -255,14 +255,14 @@ VULN_RULES = {
             r"res\.header\s*\(\s*['\"]Access-Control-Allow-Origin['\"],\s*['\"]?\*['\"]?\s*\)",
             r"setHeader\s*\(\s*['\"]Access-Control-Allow-Origin['\"],\s*['\"]?\*['\"]?\s*\)",
         ],
-        "description": "CORS configurado para permitir cualquier origen (*) permite acceso no autorizado",
+        "description": "CORS configured to allow any origin (*) enables unauthorized access",
         "recommendations": [
-            "Especificar orígenes permitidos explícitamente",
-            "Usar lista blanca de dominios autorizados",
-            "Nunca usar wildcard (*) con credentials: true",
-            "Validar origen en cada solicitud",
-            "Implementar preflight requests para métodos complejos",
-            "Mantener CORS habilitado solo para endpoints que lo necesiten"
+            "Explicitly specify allowed origins",
+            "Use a whitelist of authorized domains",
+            "Never use wildcard (*) with credentials: true",
+            "Validate origin on every request",
+            "Implement preflight requests for complex methods",
+            "Enable CORS only for endpoints that require it"
         ]
     },
     
@@ -281,14 +281,14 @@ VULN_RULES = {
             r"for\s*\(\s*.*\s+in\s+(?:req\.body|query|params|obj)\s*\)",
             r"Object\.keys.*\.forEach\s*\([\s\S]*?obj\[.*\]\s*=",
         ],
-        "description": "Asignación a propiedades sin validar permite contaminar el prototipo de objetos",
+        "description": "Assignment to properties without validation enables object prototype pollution",
         "recommendations": [
-            "Usar Object.hasOwnProperty() para verificar propiedades",
-            "Usar Map en lugar de objetos planos cuando sea posible",
-            "Validar nombres de propiedades contra whitelist",
-            "Usar Object.freeze() para congelar prototipos críticos",
-            "Evitar Object.assign() y spread operator con datos untrusted",
-            "Usar librerías como lodash con opciones de seguridad habilitadas"
+            "Use Object.hasOwnProperty() to verify properties",
+            "Use Map instead of plain objects when possible",
+            "Validate property names against a whitelist",
+            "Use Object.freeze() to lock critical prototypes",
+            "Avoid Object.assign() and spread operators with untrusted data",
+            "Use libraries like lodash with security options enabled"
         ]
     },
 
@@ -307,19 +307,19 @@ VULN_RULES = {
             r"req\.user\.(?:id|sub)\s*\|\|\s*(?:req\.params|req\.query)\.(?:id|userId)",
             r"authorize\s*\(\s*\)\s*;\s*(?:.*)\.(?:findById|findByPk)\s*\(\s*req\.params\.id"
         ],
-        "description": "Acceso directo a recursos por ID controlado por usuario sin verificación de propiedad/autorización (IDOR)",
+        "description": "Direct access to resources by user-controlled ID without ownership/authorization checks (IDOR)",
         "recommendations": [
-            "Verificar ownership del recurso antes de devolver o modificar datos",
-            "No confiar en IDs recibidos desde params/query/body",
-            "Aplicar controles de autorización por objeto (ABAC/RBAC por recurso)",
-            "Usar IDs indirectos u opacos cuando sea posible",
-            "Registrar y monitorear acceso a objetos sensibles",
-            "Añadir pruebas negativas para acceso cruzado entre usuarios"
+            "Verify resource ownership before returning or modifying data",
+            "Do not trust IDs received from params/query/body",
+            "Apply object-level authorization controls (ABAC/RBAC per resource)",
+            "Use indirect or opaque IDs when possible",
+            "Log and monitor access to sensitive objects",
+            "Add negative tests for cross-user access"
         ]
     },
 
     "debug_endpoint_exposure": {
-        "name": "Exposición de información sensible (debug endpoint)",
+        "name": "Sensitive Information Exposure (Debug Endpoint)",
         "severity": "medium",
         "patterns": [
             r"app\.get\s*\(\s*['\"]/debug",
@@ -333,19 +333,19 @@ VULN_RULES = {
             r"app\.use\s*\(\s*require\(['\"]morgan['\"]\)\s*\(\s*['\"]dev['\"]\)",
             r"res\.send\s*\(\s*err\.stack"
         ],
-        "description": "Endpoints o respuestas de debug pueden exponer stack traces, variables de entorno y configuración sensible",
+        "description": "Debug endpoints or responses may expose stack traces, environment variables, and sensitive configuration",
         "recommendations": [
-            "Deshabilitar endpoints de debug en producción",
-            "No retornar stack traces al cliente",
-            "Filtrar secretos en logs y respuestas de error",
-            "Proteger rutas internas con autenticación fuerte",
-            "Usar manejo de errores genérico para clientes",
-            "Configurar NODE_ENV=production en despliegues"
+            "Disable debug endpoints in production",
+            "Do not return stack traces to clients",
+            "Filter secrets in logs and error responses",
+            "Protect internal routes with strong authentication",
+            "Use generic error handling for clients",
+            "Set NODE_ENV=production in deployments"
         ]
     },
 
     "jwt_auth_mismanagement": {
-        "name": "Mala gestión de autenticación con JWT",
+        "name": "JWT Authentication Mismanagement",
         "severity": "high",
         "patterns": [
             r"jwt\.sign\s*\(\s*.*,\s*['\"][^'\"]+['\"]",
@@ -359,14 +359,14 @@ VULN_RULES = {
             r"SECRET(?:_KEY)?\s*[:=]\s*['\"][^'\"]+['\"]",
             r"allowInvalidAsymmetricKeyTypes\s*:\s*true"
         ],
-        "description": "Configuraciones inseguras de JWT (secreto hardcodeado, expiración débil o validación incompleta)",
+        "description": "Insecure JWT configurations (hardcoded secret, weak expiration, or incomplete validation)",
         "recommendations": [
-            "Guardar secretos JWT fuera del código fuente",
-            "Validar firma, issuer, audience y expiración",
-            "Evitar algoritmos inseguros como none",
-            "Usar expiraciones cortas y rotación de claves",
-            "No usar decode() para decisiones de autorización",
-            "Implementar revocación/blacklist para tokens comprometidos"
+            "Store JWT secrets outside source code",
+            "Validate signature, issuer, audience, and expiration",
+            "Avoid insecure algorithms such as none",
+            "Use short expirations and key rotation",
+            "Do not use decode() for authorization decisions",
+            "Implement revocation/blacklists for compromised tokens"
         ]
     },
 
@@ -385,14 +385,14 @@ VULN_RULES = {
             r"token\s*=\s*header\s*\+\s*['\"]\\.['\"]\s*\+\s*payload\s*\+\s*['\"]\\.['\"]",
             r"res\.locals\.(?:user|claims)\s*=\s*jwt\.decode"
         ],
-        "description": "Manipulación del payload JWT sin verificación robusta de firma permite escalación de privilegios",
+        "description": "JWT payload manipulation without robust signature verification enables privilege escalation",
         "recommendations": [
-            "Usar jwt.verify() con lista explícita de algoritmos permitidos",
-            "Rechazar tokens con alg=none",
-            "Nunca confiar en claims decodificados sin verificar firma",
-            "Validar aud/iss/sub y clocks de expiración",
-            "Firmar con claves fuertes y rotarlas periódicamente",
-            "Registrar intentos de tokens inválidos/manipulados"
+            "Use jwt.verify() with an explicit list of allowed algorithms",
+            "Reject tokens with alg=none",
+            "Never trust decoded claims without signature verification",
+            "Validate aud/iss/sub and expiration skew settings",
+            "Sign with strong keys and rotate them periodically",
+            "Log attempts involving invalid or manipulated tokens"
         ]
     }
 }
